@@ -20,5 +20,7 @@ img_array = np.expand_dims(img_array, axis=0)
 prediction = model.predict(img_array)
 
 predicted_index = np.argmax(prediction)
+confidence = np.max(prediction)*100
 predicted_breed = encoder.inverse_transform([predicted_index])
 print("Predicted breed:", predicted_breed[0])
+print("Confidence: {:.2f}%".format(confidence))

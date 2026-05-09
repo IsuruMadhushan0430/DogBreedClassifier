@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Dog Breed Classifier</title>
+    </head>
+
+    <body>
+        <h1>Dog Breed Classifier</h1>
+
+        <form method="POST" enctype="multipart/form-data">
+            <input type="file" name="image" required>
+            <br><br>
+
+            <button type="submit">Predict</button>
+        </form>
+
+        {% if image_path %}
+            <img src="{{image_path}}">
+        {% endif %}
+
+        {% if prediction %}
+            <h2>
+                Breed: {{prediction}}
+            </h2>
+            <h3>
+                Confidence: {{confidence}}%
+            </h3>
+        {% endif %}
+    </body>
+</html>
