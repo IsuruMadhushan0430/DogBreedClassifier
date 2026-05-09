@@ -34,3 +34,6 @@ app/__pycache__/
 # Data
 .dataset/
 dataset/
+
+#static
+static/uploads/
