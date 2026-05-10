@@ -1,30 +1,284 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Dog Breed Classifier</title>
-    </head>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-    <body>
-        <h1>Dog Breed Classifier</h1>
+    <title>Dog Breed Classifier</title>
 
-        <form method="POST" enctype="multipart/form-data">
-            <input type="file" name="image" required>
-            <br><br>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-            <button type="submit">Predict</button>
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:'Poppins', sans-serif;
+        }
+
+        body{
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            background:
+            linear-gradient(
+                135deg,
+                #0f172a,
+                #1e293b,
+                #312e81
+            );
+            padding:20px;
+        }
+
+        .container{
+            width:100%;
+            max-width:750px;
+
+            background: rgba(255,255,255,0.08);
+            border:1px solid rgba(255,255,255,0.1);
+
+            backdrop-filter: blur(18px);
+
+            border-radius:30px;
+
+            padding:40px;
+
+            text-align:center;
+
+            box-shadow:
+            0 8px 32px rgba(0,0,0,0.35);
+        }
+
+        h1{
+            color:white;
+            font-size:42px;
+            margin-bottom:10px;
+            font-weight:700;
+        }
+
+        .subtitle{
+            color:#cbd5e1;
+            margin-bottom:35px;
+            font-size:16px;
+        }
+
+        .upload-box{
+            border:2px dashed rgba(255,255,255,0.2);
+            border-radius:20px;
+            padding:40px;
+            margin-bottom:25px;
+            background: rgba(255,255,255,0.05);
+            transition:0.3s;
+        }
+
+        .upload-box:hover{
+            transform:translateY(-3px);
+            border-color:#8b5cf6;
+        }
+
+        input[type="file"]{
+            color:white;
+            font-size:15px;
+        }
+
+        button{
+            background:
+            linear-gradient(
+                135deg,
+                #8b5cf6,
+                #6366f1
+            );
+
+            color:white;
+            border:none;
+            padding:15px 40px;
+            border-radius:50px;
+            font-size:18px;
+            font-weight:600;
+            cursor:pointer;
+            transition:0.3s;
+        }
+
+        button:hover{
+            transform:scale(1.05);
+            box-shadow:
+            0 10px 25px rgba(139,92,246,0.4);
+        }
+
+        .result-card{
+            margin-top:35px;
+            background:
+            rgba(255,255,255,0.08);
+
+            border-radius:25px;
+            padding:25px;
+
+            border:1px solid rgba(255,255,255,0.1);
+        }
+
+        .dog-image{
+            width:280px;
+            height:280px;
+
+            object-fit:cover;
+
+            border-radius:20px;
+
+            margin-bottom:20px;
+
+            border:3px solid rgba(255,255,255,0.15);
+        }
+
+        .breed{
+            color:white;
+            font-size:30px;
+            font-weight:700;
+            margin-bottom:10px;
+
+            text-transform: capitalize;
+        }
+
+        .not-predicted{
+            color:#ef4444;
+        }
+
+        .confidence{
+            color:#cbd5e1;
+            font-size:18px;
+            margin-bottom:20px;
+        }
+
+        .confidence span{
+            color:#22c55e;
+            font-weight:bold;
+        }
+
+        .details-card{
+
+            background: rgba(255,255,255,0.06);
+
+            border:1px solid rgba(255,255,255,0.1);
+
+            border-radius:20px;
+
+            padding:25px;
+
+            text-align:left;
+
+            margin-top:25px;
+
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .details-card h3{
+            color:white;
+            margin-bottom:15px;
+            font-size:22px;
+        }
+
+        .details-card p{
+            color:#cbd5e1;
+            line-height:1.8;
+            font-size:15px;
+        }
+
+        @keyframes fadeIn{
+            from{
+                opacity:0;
+                transform:translateY(10px);
+            }
+            to{
+                opacity:1;
+                transform:translateY(0);
+            }
+        }
+
+        @media(max-width:768px){
+
+            .container{
+                padding:25px;
+            }
+
+            h1{
+                font-size:32px;
+            }
+
+            .dog-image{
+                width:100%;
+                height:auto;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>🐶 Dog Breed Classifier</h1>
+
+        <p class="subtitle">
+            Upload a dog image and let AI identify the breed
+        </p>
+
+        <form method="POST"
+              enctype="multipart/form-data">
+
+            <div class="upload-box">
+
+                <input type="file"
+                       name="image"
+                       required>
+
+            </div>
+
+            <button type="submit">
+                Predict Breed
+            </button>
+
         </form>
 
-        {% if image_path %}
-            <img src="{{image_path}}">
+        {% if prediction %}
+
+        <div class="result-card">
+
+            <img
+                src="{{ image_path }}"
+                class="dog-image"
+            >
+
+            <div class="breed
+            {% if prediction == 'Not Predicted' %}
+            not-predicted
+            {% endif %}">
+                {{ prediction.replace("_", " ") }}
+            </div>
+
+            <div class="confidence">
+                Confidence:
+                <span>
+                    {{ confidence|round(2) }}%
+                </span>
+            </div>
+
+            <div class="details-card">
+
+                <h3>🐾 About This Breed</h3>
+
+                <pre>
+                    {{ desc }}
+                </pre>
+
+            </div>
+
+        </div>
+
         {% endif %}
 
-        {% if prediction %}
-            <h2>
-                Breed: {{prediction}}
-            </h2>
-            <h3>
-                Confidence: {{confidence}}%
-            </h3>
-        {% endif %}
-    </body>
+    </div>
+
+</body>
 </html>

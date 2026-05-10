@@ -5,6 +5,7 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from tensorflow.keras.preprocessing import image
 import os
+import requests
 
 app = Flask(__name__)
 
@@ -21,6 +22,7 @@ def home():
     prediction = None
     confidence = None
     image_path = None
+    desc = None
 
     if request.method == 'POST':
         file=request.files['image']
@@ -53,14 +55,102 @@ def home():
             )[0]
 
             confidence = np.max(pred)*100
+            if confidence < 40:
+                prediction = "Not Predicted"
+
+                desc = (
+                    "The system could not confidently "
+                    "identify this dog breed. "
+                    "Please upload a clearer dog image."
+                )
+            else:
+                desc = get_breed_info(prediction)
+
             image_path = filepath
 
     return render_template(
         "index.html",
         prediction=prediction,
         confidence=confidence,
-        image_path=image_path
+        image_path=image_path,
+        desc = desc
     )
+
+API_KEY = "live_rvl5fjfVn5IV5y8N0pAjTCxGMquxr8NnegrbFgoLAkGKiQe6JdCqj2aJ8m8UALXY"
+
+def get_breed_info(breed):
+
+    try:
+
+        breed_name = breed.replace("_", " ")
+
+        url = "https://api.thedogapi.com/v1/breeds/search/"
+
+        headers = {
+            "x-api-key": API_KEY
+        }
+
+        params = {
+            "q": breed_name
+        }
+
+        response = requests.get(
+            url,
+            headers=headers,
+            params=params
+        )
+
+        print(response.status_code)
+        print(response.text)
+
+        data = response.json()
+
+        if data and len(data) > 0:
+
+            dog = data[0]
+
+            temperament = dog.get(
+                "temperament",
+                "No temperament info"
+            )
+
+            life_span = dog.get(
+                "life_span",
+                "Unknown"
+            )
+
+            breed_group = dog.get(
+                "breed_group",
+                "Unknown"
+            )
+
+            weight = dog.get(
+                "weight",
+                {}
+            ).get(
+                "metric",
+                "Unknown"
+            )
+
+            info = f"""
+Temperament: {temperament}
+
+Life Span: {life_span}
+
+Weight: {weight} kg
+
+Breed Group: {breed_group}
+"""
+
+            return info
+
+        return "Breed info not found."
+
+    except Exception as e:
+
+        print("API ERROR:", e)
+
+        return "API Error"
     
 if __name__ == "__main__":
     app.run(debug=True)
